@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PostGenius — AI Social Media Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #f0f0ff;
+    --text2: #8888aa;
+    --border: rgba(108,99,255,0.2);
+    --glow: rgba(108,99,255,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(255,101,132,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(67,233,123,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== NAVBAR ===== */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 1.2rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.8);
+    backdrop-filter: blur(20px);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .nav-links { display: flex; gap: 1rem; align-items: center; }
+
+  .btn {
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #8b7cf8);
+    color: white;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(108,99,255,0.4); }
+
+  /* ===== PAGES ===== */
+  .page { display: none; min-height: 100vh; padding-top: 80px; position: relative; z-index: 1; }
+  .page.active { display: block; }
+
+  /* ===== LANDING PAGE ===== */
+  .hero {
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--glow);
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text2);
+    max-width: 560px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  .btn-large {
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+
+  /* Stats */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    padding: 3rem 2rem;
+    flex-wrap: wrap;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-label { color: var(--text2); font-size: 0.85rem; margin-top: 0.3rem; }
+
+  /* Features */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+  }
+  .feature-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(108,99,255,0.1);
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card p { color: var(--text2); font-size: 0.9rem; line-height: 1.6; }
+
+  /* Pricing */
+  .pricing-section {
+    max-width: 900px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+    text-align: center;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-sub { color: var(--text2); margin-bottom: 3rem; }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .pricing-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: left;
+    position: relative;
+    transition: all 0.3s;
+  }
+
+  .pricing-card.popular {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(108,99,255,0.1), var(--surface));
+  }
+
+  .popular-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    padding: 0.3rem 1rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .plan-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--text2); }
+  .plan-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0.5rem 0;
+  }
+  .plan-price span { font-size: 1rem; color: var(--text2); font-weight: 400; }
+
+  .plan-features { list-style: none; margin: 1.5rem 0; }
+  .plan-features li {
+    padding: 0.4rem 0;
+    color: var(--text2);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .plan-features li::before { content: '✓'; color: var(--accent3); font-weight: 700; }
+
+  /* ===== AUTH PAGE ===== */
+  .auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 80px);
+    padding: 2rem;
+  }
+
+  .auth-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .auth-box h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .auth-box p { color: var(--text2); margin-bottom: 2rem; font-size: 0.9rem; }
+
+  .input-group { margin-bottom: 1.2rem; }
+  .input-group label { display: block; font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+
+  .input-group input, .input-group select, .input-group textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .input-group textarea { resize: vertical; min-height: 100px; }
+
+  .input-group select option { background: var(--surface2); }
+
+  .auth-switch { text-align: center; margin-top: 1.5rem; color: var(--text2); font-size: 0.9rem; }
+  .auth-switch a { color: var(--accent); cursor: pointer; text-decoration: none; }
+
+  /* ===== DASHBOARD ===== */
+  .dashboard-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 80px);
+  }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+  }
+
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    background: var(--surface2);
+    border-radius: 12px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .sidebar-name { font-weight: 600; font-size: 0.9rem; }
+  .sidebar-plan { font-size: 0.75rem; color: var(--accent); }
+
+  .sidebar-menu { list-style: none; }
+  .sidebar-menu li {
+    margin-bottom: 0.3rem;
+  }
+
+  .sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .sidebar-menu a:hover, .sidebar-menu a.active {
+    background: var(--glow);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .main-content { padding: 2rem; overflow-y: auto; }
+
+  .content-section { display: none; }
+  .content-section.active { display: block; }
+
+  /* Dashboard home */
+  .dash-greeting {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .dash-sub { color: var(--text2); margin-bottom: 2rem; }
+
+  .dash-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .dash-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+
+  .dash-card-label { color: var(--text2); font-size: 0.8rem; margin-bottom: 0.5rem; }
+  .dash-card-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Generate section */
+  .generate-container { max-width: 800px; }
+
+  .generate-container h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .generate-container p { color: var(--text2); margin-bottom: 2rem; }
+
+  .setup-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .dashboard-layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+
+  /* Generated posts */
+  .posts-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .post-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    transition: all 0.2s;
+    animation: fadeUp 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .post-card:hover { border-color: var(--accent); }
+
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .post-day {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--accent);
+    background: var(--glow);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+  }
+
+  .post-platform {
+    font-size: 0.8rem;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .post-content {
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .post-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .btn-sm {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+  .btn-outline:hover { background: var(--glow); }
+
+  /* Loading */
+  .loading-container {
+    display: none;
+    text-align: center;
+    padding: 3rem;
+  }
+
+  .loading-container.active { display: block; }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    color: var(--text2);
+    font-size: 0.95rem;
+  }
+
+  .loading-steps { margin-top: 1rem; }
+  .loading-step {
+    color: var(--text2);
+    font-size: 0.85rem;
+    padding: 0.3rem 0;
+    transition: color 0.3s;
+  }
+  .loading-step.done { color: var(--accent3); }
+  .loading-step.current { color: var(--accent); }
+
+  /* Notification */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--surface2);
+    border: 1px solid var(--accent3);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    z-index: 999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Schedule section */
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .schedule-day {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.8rem 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+  }
+
+  .schedule-day.has-post { border-color: var(--accent); background: var(--glow); }
+  .schedule-day-name { color: var(--text2); margin-bottom: 0.3rem; font-size: 0.7rem; }
+  .schedule-day-num { font-family: 'Syne', sans-serif; font-weight: 700; }
+
+  /* Alert box */
+  .alert {
+    background: rgba(108,99,255,0.1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text2);
+    font-size: 0.9rem;
+  }
+
+  .alert strong { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="logo">PostGenius</div>
+  <div class="nav-links" id="navLinks">
+    <button class="btn btn-ghost" onclick="showPage('login')">Login</button>
+    <button class="btn btn-primary" onclick="showPage('signup')">Get Started Free</button>
+  </div>
+</nav>
+
+<!-- ===== LANDING PAGE ===== -->
+<div id="page-landing" class="page active">
+  <div class="hero">
+    <div class="hero-badge">✨ AI-Powered Social Media Automation</div>
+    <h1>Your Business Deserves to <span>Go Viral</span></h1>
+    <p>PostGenius creates 30 days of professional social media content for your business in 60 seconds. No designer. No copywriter. Just AI.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary btn-large" onclick="showPage('signup')">Start Free Today</button>
+      <button class="btn btn-ghost btn-large" onclick="document.querySelector('.features').scrollIntoView({behavior:'smooth'})">See How It Works</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">30</div>
+      <div class="stat-label">Posts Generated</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">60s</div>
+      <div class="stat-label">Time to Generate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">AI Automated</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">$0</div>
+      <div class="stat-label">To Start</div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>AI Content Generation</h3>
+      <p>Describe your business once. Our AI creates engaging posts tailored to your brand voice and audience.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <h3>30-Day Content Calendar</h3>
+      <p>Get an entire month of ready-to-post content instantly. Never run out of ideas again.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <h3>Multi-Platform Ready</h3>
+      <p>Posts optimized for Instagram, Facebook, LinkedIn and Twitter — all at once.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>One Click Copy</h3>
+      <p>Copy any post instantly and paste it directly to your social media. Done in seconds.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>Industry Specific</h3>
+      <p>Content tailored to your specific industry — restaurant, retail, salon, gym, and more.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💰</div>
+      <h3>Save $500/Month</h3>
+      <p>Replace your expensive social media manager with AI that works 24/7 for a fraction of the cost.</p>
+    </div>
+  </div>
+
+  <div class="pricing-section">
+    <div class="section-title">Simple Pricing</div>
+    <div class="section-sub">Start free. Upgrade when you're ready.</div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="plan-name">STARTER</div>
+        <div class="plan-price">Free</div>
+        <ul class="plan-features">
+          <li>10 posts per month</li>
+          <li>1 business profile</li>
+          <li>Instagram & Facebook</li>
+          <li>Copy & paste posts</li>
+        </ul>
+        <button class="btn btn-ghost" style="width:100%" onclick="showPage('signup')">Get Started</button>
+      </div>
+      <div class="pricing-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="plan-name">GROWTH</div>
+        <div class="plan-price">$9<span>/month</span></div>
+        <ul class="plan-features">
+          <li>30 posts per month</li>
+          <li>3 business profiles</li>
+          <li>All platforms</li>
+          <li>Hashtag suggestions</li>
+          <li>Content calendar</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%" onclick="showPage('signup')">Start Free Trial</button>
+      </div>
+      <div class="pricing-card">
+        <div class="plan-name">AGENCY</div>
+        <div class="plan-price">$19<span>/month</span></div>
+        <ul class="plan-features">
+          <li>Unlimited posts</li>
+          <li>10 business profiles</li>
+          <li>All platforms</li>
+          <li>Priority AI generation</li>
+          <li>Analytics dashboard</li>
+          <li>White label reports</li>
+        </ul>
+        <button class="btn btn-ghost" style="width:100%" onclick="showPage('signup')">Get Started</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SIGNUP PAGE ===== -->
+<div id="page-signup" class="page">
+  <div class="auth-container">
+    <div class="auth-box">
+      <h2>Create Account</h2>
+      <p>Start generating AI content for your business today</p>
+      <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="signupName" placeholder="Your name">
+      </div>
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="Create a password">
+      </div>
+      <button class="btn btn-primary" style="width:100%; padding:0.9rem" onclick="handleSignup()">Create Account →</button>
+      <div class="auth-switch">Already have an account? <a onclick="showPage('login')">Login</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="page-login" class="page">
+  <div class="auth-container">
+    <div class="auth-box">
+      <h2>Welcome Back</h2>
+      <p>Login to manage your AI content</p>
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Your password">
+      </div>
+      <button class="btn btn-primary" style="width:100%; padding:0.9rem" onclick="handleLogin()">Login →</button>
+      <div class="auth-switch">Don't have an account? <a onclick="showPage('signup')">Sign up free</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="page-dashboard" class="page">
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-user">
+        <div class="avatar" id="sidebarAvatar">J</div>
+        <div>
+          <div class="sidebar-name" id="sidebarName">User</div>
+          <div class="sidebar-plan">Free Plan</div>
+        </div>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a class="active" onclick="showSection('home')">🏠 Dashboard</a></li>
+        <li><a onclick="showSection('generate')">✨ Generate Posts</a></li>
+        <li><a onclick="showSection('posts')">📋 My Posts</a></li>
+        <li><a onclick="showSection('schedule')">📅 Schedule</a></li>
+        <li><a onclick="showSection('settings')">⚙️ Settings</a></li>
+        <li style="margin-top:2rem"><a onclick="handleLogout()" style="color:#ff6584">🚪 Logout</a></li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+      <!-- Home Section -->
+      <div id="section-home" class="content-section active">
+        <div class="dash-greeting" id="dashGreeting">Good morning! 👋</div>
+        <div class="dash-sub">Here's your content overview</div>
+        <div class="dash-cards">
+          <div class="dash-card">
+            <div class="dash-card-label">Posts Generated</div>
+            <div class="dash-card-value" id="statPosts">0</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-label">This Month</div>
+            <div class="dash-card-value" id="statMonth">0</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-label">Posts Remaining</div>
+            <div class="dash-card-value">10</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-label">Platforms</div>
+            <div class="dash-card-value">2</div>
+          </div>
+        </div>
+        <div class="alert">
+          <strong>🚀 Ready to create content?</strong> Go to Generate Posts and describe your business. AI will create 30 days of posts in seconds!
+        </div>
+        <button class="btn btn-primary btn-large" onclick="showSection('generate')">Generate My Posts Now →</button>
+      </div>
+
+      <!-- Generate Section -->
+      <div id="section-generate" class="content-section">
+        <div class="generate-container">
+          <h2>✨ Generate AI Posts</h2>
+          <p>Tell us about your business and we'll create 30 days of content instantly</p>
+
+          <div class="setup-form">
+            <div class="form-grid">
+              <div class="input-group">
+                <label>Business Name</label>
+                <input type="text" id="bizName" placeholder="e.g. Sharma's Bakery">
+              </div>
+              <div class="input-group">
+                <label>Industry</label>
+                <select id="bizIndustry">
+                  <option value="">Select industry</option>
+                  <option>Restaurant / Food</option>
+                  <option>Retail / Shop</option>
+                  <option>Beauty / Salon</option>
+                  <option>Fitness / Gym</option>
+                  <option>Healthcare</option>
+                  <option>Education / Coaching</option>
+                  <option>Real Estate</option>
+                  <option>Technology</option>
+                  <option>Fashion / Clothing</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="input-group">
+              <label>Describe your business & target audience</label>
+              <textarea id="bizDescription" placeholder="e.g. We sell handmade sweets and traditional Indian snacks. Our customers are families and working professionals in Pune who love authentic homemade taste."></textarea>
+            </div>
+            <div class="form-grid">
+              <div class="input-group">
+                <label>Tone / Style</label>
+                <select id="bizTone">
+                  <option>Professional</option>
+                  <option>Friendly & Casual</option>
+                  <option>Fun & Playful</option>
+                  <option>Inspirational</option>
+                  <option>Luxury / Premium</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Platform</label>
+                <select id="bizPlatform">
+                  <option>Instagram</option>
+                  <option>Facebook</option>
+                  <option>LinkedIn</option>
+                  <option>Twitter / X</option>
+                  <option>All Platforms</option>
+                </select>
+              </div>
+            </div>
+            <div class="input-group">
+              <label>Number of posts to generate</label>
+              <select id="postCount">
+                <option value="5">5 posts (Quick preview)</option>
+                <option value="10" selected>10 posts</option>
+                <option value="30">30 posts (Full month)</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-large" onclick="generatePosts()" style="width:100%">
+              ✨ Generate Posts Now
+            </button>
+          </div>
+
+          <!-- Loading -->
+          <div class="loading-container" id="loadingContainer">
+            <div class="spinner"></div>
+            <div class="loading-text">AI is crafting your content...</div>
+            <div class="loading-steps">
+              <div class="loading-step" id="step1">📊 Analyzing your business...</div>
+              <div class="loading-step" id="step2">✍️ Writing engaging captions...</div>
+              <div class="loading-step" id="step3">🏷️ Adding hashtags...</div>
+              <div class="loading-step" id="step4">✅ Finalizing your posts...</div>
+            </div>
+          </div>
+
+          <!-- Posts output -->
+          <div id="postsOutput" class="posts-grid"></div>
+        </div>
+      </div>
+
+      <!-- My Posts Section -->
+      <div id="section-posts" class="content-section">
+        <h2 style="font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">📋 My Posts</h2>
+        <p style="color:var(--text2);margin-bottom:2rem">All your generated posts saved here</p>
+        <div id="savedPostsContainer">
+          <div class="alert">No posts yet. Go to <strong>Generate Posts</strong> to create your first batch!</div>
+        </div>
+      </div>
+
+      <!-- Schedule Section -->
+      <div id="section-schedule" class="content-section">
+        <h2 style="font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">📅 Content Calendar</h2>
+        <p style="color:var(--text2);margin-bottom:2rem">Your posting schedule for this month</p>
+        <div id="calendarContainer">
+          <div class="alert">Generate posts first to see your content calendar!</div>
+        </div>
+      </div>
+
+      <!-- Settings Section -->
+      <div id="section-settings" class="content-section">
+        <h2 style="font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.5rem">⚙️ Settings</h2>
+        <p style="color:var(--text2);margin-bottom:2rem">Manage your account</p>
+        <div class="setup-form">
+          <div class="input-group">
+            <label>Groq API Key</label>
+            <input type="password" id="apiKeyInput" placeholder="gsk_...your key here">
+          </div>
+          <p style="color:var(--text2);font-size:0.85rem;margin-bottom:1rem">
+            Get your free API key at <strong style="color:var(--accent)">console.groq.com</strong> → API Keys
+          </p>
+          <button class="btn btn-primary" onclick="saveApiKey()">Save API Key</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+let currentUser = null;
+let generatedPosts = [];
+let savedPosts = JSON.parse(localStorage.getItem('pg_posts') || '[]');
+let users = JSON.parse(localStorage.getItem('pg_users') || '[]');
+let apiKey = localStorage.getItem('pg_apikey') || '';
+
+// ===== NAVIGATION =====
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+
+  const nav = document.getElementById('navLinks');
+  if (page === 'dashboard') {
+    nav.innerHTML = `<span style="color:var(--text2);font-size:0.9rem" id="sidebarNameNav"></span>`;
+  } else {
+    nav.innerHTML = `
+      <button class="btn btn-ghost" onclick="showPage('login')">Login</button>
+      <button class="btn btn-primary" onclick="showPage('signup')">Get Started Free</button>
+    `;
+  }
+}
+
+function showSection(section) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+  document.getElementById('section-' + section).classList.add('active');
+  event.target.classList.add('active');
+
+  if (section === 'posts') renderSavedPosts();
+  if (section === 'schedule') renderCalendar();
+}
+
+// ===== AUTH =====
+function handleSignup() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+
+  if (!name || !email || !password) { showToast('Please fill all fields'); return; }
+
+  if (users.find(u => u.email === email)) { showToast('Email already registered'); return; }
+
+  const user = { name, email, password, joined: new Date().toISOString() };
+  users.push(user);
+  localStorage.setItem('pg_users', JSON.stringify(users));
+
+  currentUser = user;
+  loadDashboard();
+}
+
+function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  const user = users.find(u => u.email === email && u.password === password);
+  if (!user) { showToast('Invalid email or password'); return; }
+
+  currentUser = user;
+  loadDashboard();
+}
+
+function handleLogout() {
+  currentUser = null;
+  showPage('landing');
+}
+
+function loadDashboard() {
+  showPage('dashboard');
+  document.getElementById('sidebarName').textContent = currentUser.name.split(' ')[0];
+  document.getElementById('sidebarAvatar').textContent = currentUser.name[0].toUpperCase();
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('dashGreeting').textContent = `${greeting}, ${currentUser.name.split(' ')[0]}! 👋`;
+
+  const myPosts = savedPosts.filter(p => p.userEmail === currentUser.email);
+  document.getElementById('statPosts').textContent = myPosts.length;
+  document.getElementById('statMonth').textContent = myPosts.filter(p => {
+    const d = new Date(p.date);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+
+  if (apiKey) document.getElementById('apiKeyInput').value = apiKey;
+}
+
+// ===== GENERATE POSTS =====
+async function generatePosts() {
+  const bizName = document.getElementById('bizName').value.trim();
+  const industry = document.getElementById('bizIndustry').value;
+  const description = document.getElementById('bizDescription').value.trim();
+  const tone = document.getElementById('bizTone').value;
+  const platform = document.getElementById('bizPlatform').value;
+  const count = document.getElementById('postCount').value;
+
+  if (!bizName || !industry || !description) {
+    showToast('Please fill all business details');
+    return;
+  }
+
+  if (!apiKey) {
+    showToast('Please add your Groq API key in Settings first!');
+    showSection('settings');
+    return;
+  }
+
+  // Show loading
+  document.getElementById('loadingContainer').classList.add('active');
+  document.getElementById('postsOutput').innerHTML = '';
+  animateLoadingSteps();
+
+  const prompt = `You are a professional social media content creator. Create exactly ${count} unique social media posts for the following business:
+
+Business Name: ${bizName}
+Industry: ${industry}
+Description: ${description}
+Tone: ${tone}
+Platform: ${platform}
+
+Requirements:
+- Each post must be engaging, authentic, and platform-appropriate
+- Include relevant emojis naturally
+- Add 5-8 relevant hashtags at the end of each post
+- Vary the content types: promotional, educational, storytelling, tips, behind-the-scenes, etc.
+- Make each post feel fresh and different
+
+Return ONLY a valid JSON array in this exact format, no other text:
+[
+  {
+    "day": 1,
+    "type": "Promotional",
+    "content": "Full post content here with emojis and hashtags"
+  }
+]`;
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'llama3-8b-8192',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.8,
+        max_tokens: 4000
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
+    const text = data.choices[0].message.content;
+
+    // Parse JSON
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('Invalid response format');
+
+    generatedPosts = JSON.parse(jsonMatch[0]);
+
+    // Save posts
+    generatedPosts.forEach(post => {
+      savedPosts.push({
+        ...post,
+        bizName,
+        platform,
+        userEmail: currentUser.email,
+        date: new Date().toISOString(),
+        id: Date.now() + Math.random()
+      });
+    });
+    localStorage.setItem('pg_posts', JSON.stringify(savedPosts));
+
+    // Update stats
+    document.getElementById('statPosts').textContent = savedPosts.filter(p => p.userEmail === currentUser.email).length;
+    document.getElementById('statMonth').textContent = savedPosts.filter(p => {
+      const d = new Date(p.date);
+      const now = new Date();
+      return p.userEmail === currentUser.email && d.getMonth() === now.getMonth();
+    }).length;
+
+    document.getElementById('loadingContainer').classList.remove('active');
+    renderPosts(generatedPosts, platform);
+    showToast('✅ ' + count + ' posts generated successfully!');
+
+  } catch (err) {
+    document.getElementById('loadingContainer').classList.remove('active');
+    document.getElementById('postsOutput').innerHTML = `
+      <div class="alert" style="border-color:#ff6584;color:#ff6584">
+        ❌ Error: ${err.message}. Please check your API key in Settings.
+      </div>`;
+    showToast('Error generating posts. Check your API key!');
+  }
+}
+
+function animateLoadingSteps() {
+  const steps = ['step1', 'step2', 'step3', 'step4'];
+  steps.forEach(s => document.getElementById(s).className = 'loading-step');
+
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i > 0) document.getElementById(steps[i-1]).className = 'loading-step done';
+    if (i < steps.length) {
+      document.getElementById(steps[i]).className = 'loading-step current';
+      i++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 1500);
+}
+
+function renderPosts(posts, platform) {
+  const container = document.getElementById('postsOutput');
+  container.innerHTML = `<h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1rem;color:var(--accent3)">✅ ${posts.length} Posts Generated!</h3>`;
+
+  posts.forEach((post, idx) => {
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    card.style.animationDelay = (idx * 0.08) + 's';
+    card.innerHTML = `
+      <div class="post-header">
+        <div class="post-day">Day ${post.day}</div>
+        <div class="post-platform">📱 ${platform} · ${post.type || 'Post'}</div>
+      </div>
+      <div class="post-content">${post.content}</div>
+      <div class="post-actions">
+        <button class="btn btn-outline btn-sm" onclick="copyPost(this, ${idx})">📋 Copy</button>
+        <button class="btn btn-ghost btn-sm" onclick="deletePost(${idx})">🗑️ Remove</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function copyPost(btn, idx) {
+  navigator.clipboard.writeText(generatedPosts[idx].content).then(() => {
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+    showToast('Post copied to clipboard!');
+  });
+}
+
+function deletePost(idx) {
+  generatedPosts.splice(idx, 1);
+  renderPosts(generatedPosts, document.getElementById('bizPlatform').value);
+}
+
+function renderSavedPosts() {
+  const container = document.getElementById('savedPostsContainer');
+  const myPosts = savedPosts.filter(p => p.userEmail === currentUser.email);
+
+  if (myPosts.length === 0) {
+    container.innerHTML = '<div class="alert">No posts yet. Go to <strong>Generate Posts</strong> to create your first batch!</div>';
+    return;
+  }
+
+  container.innerHTML = `<p style="color:var(--text2);margin-bottom:1rem">${myPosts.length} posts saved</p>`;
+  const grid = document.createElement('div');
+  grid.className = 'posts-grid';
+
+  myPosts.slice().reverse().forEach((post, idx) => {
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    card.style.animationDelay = (idx * 0.05) + 's';
+    card.innerHTML = `
+      <div class="post-header">
+        <div class="post-day">${post.bizName || 'Post'} · Day ${post.day}</div>
+        <div class="post-platform">📱 ${post.platform || 'Social'}</div>
+      </div>
+      <div class="post-content">${post.content}</div>
+      <div class="post-actions">
+        <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(this.closest('.post-card').querySelector('.post-content').textContent);showToast('Copied!')">📋 Copy</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+  container.appendChild(grid);
+}
+
+function renderCalendar() {
+  const container = document.getElementById('calendarContainer');
+  const myPosts = savedPosts.filter(p => p.userEmail === currentUser.email);
+
+  if (myPosts.length === 0) {
+    container.innerHTML = '<div class="alert">Generate posts first to see your content calendar!</div>';
+    return;
+  }
+
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const totalDays = 30;
+
+  container.innerHTML = `
+    <div class="alert"><strong>${myPosts.length} posts</strong> ready in your calendar</div>
+    <div class="schedule-grid">
+      ${Array.from({length: totalDays}, (_, i) => {
+        const hasPost = myPosts.some(p => p.day === i + 1);
+        return `
+          <div class="schedule-day ${hasPost ? 'has-post' : ''}">
+            <div class="schedule-day-name">${days[i % 7]}</div>
+            <div class="schedule-day-num">${i + 1}</div>
+            ${hasPost ? '<div style="font-size:0.6rem;color:var(--accent);margin-top:2px">●</div>' : ''}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ===== SETTINGS =====
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { showToast('Please enter your API key'); return; }
+  apiKey = key;
+  localStorage.setItem('pg_apikey', key);
+  showToast('✅ API key saved successfully!');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Init
+if (apiKey) document.getElementById('apiKeyInput') && (document.getElementById('apiKeyInput').value = apiKey);
+</script>
+</body>
+</html>
